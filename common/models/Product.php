@@ -303,7 +303,7 @@ class Product extends ActiveRecord implements CartPositionInterface
         ]);
 
         $seo = [
-            '@context' => 'http=>//schema.org',
+            '@context' => 'http://schema.org',
             '@type' => 'Product',
             'name' => $this->title,
             'offers' => [
