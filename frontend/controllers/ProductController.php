@@ -65,7 +65,12 @@ class ProductController extends Controller
         $ip = Yii::$app->request->getUserIP();
         // - rating;
         $fetchProductRat = $db->createCommand("SELECT id FROM product_rating WHERE product_id='".$model->id."' AND user_id='".$user."'")->queryScalar();
-        $disabled = $fetchProductRat ? true : false;
+        if($user == null || $fetchProductRat != null){
+            $disabled = true;
+        } else {
+            $disabled = false;
+        }
+
         $rating = Yii::$app->request->post('rating');
         if (isset($rating) && Rating::create($rating, $model->id, $user))
         {
