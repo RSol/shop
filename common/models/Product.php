@@ -252,19 +252,6 @@ class Product extends ActiveRecord implements CartPositionInterface
     /**
      * @return \yii\db\ActiveQuery
      */
-    // public function getRating($sum){
-    //     $rating="";
-    //     $count='';
-    //     foreach( $sum as $plus){
-    //         $rating=$rating+$plus->value;
-    //         $count=$count+1;
-    //     }
-    //     if($rating>0) {
-    //         return $rating / $count;
-    //     }else{
-    //         return 0;
-    //     }
-    // }
     public function getRating()
     {
         return $this->hasMany(Rating::class, ['product_id'=> 'id']);

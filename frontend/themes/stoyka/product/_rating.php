@@ -3,7 +3,7 @@ use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\bootstrap\ActiveForm;
 use kartik\rating\StarRating;
-use app\common\models\Rating;
+use common\models\Rating;
 
 /**
  * @var $model Rating
@@ -11,13 +11,17 @@ use app\common\models\Rating;
 
 ?>
 <div id="rating-form">
-    <?php $form = ActiveForm::begin(['id' => 'rating-form']); ?>
+    <?php $form = ActiveForm::begin([
+            'id' => 'rating-form',
+            'enableAjaxValidation' => false,
+            'enableClientValidation' => false,
+        ]); ?>
     <?= $form->field($model, 'rating')->label('')->widget(StarRating::class, [
         'pluginOptions' => [
             'label' => '123',
             'theme' => 'krajee-uni',
             'filledStar' => '&#x2605;',
-            'step' => 0.1,
+            'step' => 1,
             'emptyStar' => '&#x2606;',
             'clearButton' => '',
             'disabled' => $disabled,
@@ -25,7 +29,7 @@ use app\common\models\Rating;
         ],
         'pluginEvents' => [
         //когда кликаем на звезды всплывает это событие, которое и обробатываем
-        'rating.change' => "function(event, value) {
+        'rating:change' => "function(event, value) {
             $.ajax({
                 type: 'POST',
                 url: '".Url::to()."',
