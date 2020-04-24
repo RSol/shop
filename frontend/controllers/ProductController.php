@@ -6,7 +6,7 @@ use common\models\Category;
 use Yii;
 use common\models\Product;
 use common\models\ProductSearch;
-use app\common\models\Rating;
+use common\models\Rating;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -60,18 +60,20 @@ class ProductController extends Controller
     public function actionView($id)
     {
         $model = $this->findModel($id);
+        $user = Yii::$app->user->getId();
         $db = Yii::$app->db;
         $ip = Yii::$app->request->getUserIP();
         // - rating;
-        $fetchProductRat = $db->createCommand("SELECT id FROM product_rating WHERE product_id='".$model->id."' AND ip='".$ip."'")->queryScalar();
+        $fetchProductRat = $db->createCommand("SELECT id FROM product_rating WHERE product_id='".$model->id."' AND user_id='".$user."'")->queryScalar();
         $disabled = $fetchProductRat ? true : false;
         $rating = Yii::$app->request->post('rating');
-        if (isset($rating) && Rating::create($rating, $model->id))
+        if (isset($rating) && Rating::create($rating, $model->id, $user))
         {
             $fetchRatingCountSum = $db->createCommand("SELECT count(*), sum(rating) FROM product_rating WHERE product_id='".$model->id."'")->queryAll();
             $count = $fetchRatingCountSum[0]['count(*)'];
             $SummRating = $fetchRatingCountSum[0]['sum(rating)'];
             $itogRat = $SummRating/$count;
+
             $db->createCommand("UPDATE product SET rating='".$itogRat."' WHERE id='".$model->id."'")->execute();
             $this->refresh();
         }

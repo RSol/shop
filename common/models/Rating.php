@@ -1,18 +1,20 @@
 <?php
 
-namespace app\common\models;
+namespace common\models;
 
 use common\models\Category;
 use Yii;
 use yii\db\ActiveRecord;
 use yii\helpers\ArrayHelper;
 use common\models\Product;
+use common\models\User;
 
 /**
  * This is the model class for table "{{%product_rating}}".
  *
  * @property int $id
  * @property int|null $product_id
+ * @property int|null $user_id
  * @property int|null $rating
  * @property int|null $ip
  * @property string|null $created_at
@@ -35,22 +37,23 @@ class Rating extends ActiveRecord
     public function rules()
     {
         return [
-            // [['product_id', 'user_id', 'rating'], 'integer'],
-            // [['ip'], 'string'],
-            // [['created_at'], 'safe'],
-            // [['product_id'], 'exist', 'skipOnError' => true, 'targetClass' => Product::className(), 'targetAttribute' => ['product_id' => 'id']],
-            // [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['user_id' => 'id']],
-
-            [['created_at', 'product_id'], 'integer'],
+            [['product_id', 'user_id'], 'integer'],
             [['rating'], 'number'],
             [['ip'], 'string'],
-            [['rating', 'product_id'], 'safe'],
+            [['rating', 'product_id', 'created_at'], 'safe'],
             [
                 ['product_id'],
                 'exist',
                 'skipOnError' => true,
                 'targetClass' => Product::class,
                 'targetAttribute' => ['product_id' => 'id']
+            ],
+            [
+                ['user_id'],
+                'exist',
+                'skipOnError' => true,
+                'targetClass' => User::class,
+                'targetAttribute' => ['user_id' => 'id']
             ],
         ];
     }
@@ -63,7 +66,7 @@ class Rating extends ActiveRecord
         return [
             'id' => 'ID',
             'product_id' => 'Product ID',
-            //'user_id' => 'User ID',
+            'user_id' => 'User ID',
             'rating' => 'Rating',
             'created_at' => 'Created At',
             'ip' => 'IP',
@@ -80,23 +83,24 @@ class Rating extends ActiveRecord
         return $this->hasOne(Product::class, ['id' => 'product_id']);
     }
 
-//    /**
-//     * Gets query for [[User]].
-//     *
-//     * @return \yii\db\ActiveQuery|UserQuery
-//     */
-    // public function getUser()
-    // {
-    //     return $this->hasOne(User::className(), ['id' => 'user_id']);
-    // }
+    /**
+     * Gets query for [[User]].
+     *
+     * @return \yii\db\ActiveQuery
+     */
+     public function getUser()
+     {
+         return $this->hasOne(User::class, ['id' => 'user_id']);
+     }
 
-    public static function create($rating, $product_id)
+    public static function create($rating, $product_id, $user_id)
     {
         $post = new self;
         $post->ip = Yii::$app->request->getUserIP();
-        $post->created_at = time();
+        $post->created_at = date('Y-m-d h:i:s');
         $post->rating = $rating;
         $post->product_id = $product_id;
+        $post->user_id = $user_id;
         if ($post->save()) return $post;
         return false;
     }
@@ -110,21 +114,4 @@ class Rating extends ActiveRecord
         }
         return parent::beforeSave($insert);
     }
-
-     public function afterSave($insert, $changedAttributes)
-     {
-     	if ($insert) {
-     		Product::getRating($this->product_id);
-     	}
-     	return parent::afterSave($insert, $changedAttributes);
-     }
-
-//    /**
-//     * {@inheritdoc}
-//     * @return RatingQuery the active query used by this AR class.
-//     */
-//    public static function find()
-//    {
-//        return new RatingQuery(get_called_class());
-//    }
 }
